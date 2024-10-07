@@ -27,81 +27,103 @@ void loop() {
 
  char letter = '\0';
 
- if (f3a<=fopen && f3b<=fopen){   //B,F,H,U,V,W
-  if (f2b>=fopen){       //F
-   letter = 'F';
-  }
-  else if (f4b<=fopen){   //B, W
-   if (f5a <= fopen){  //B
-    letter = 'B';
-   }
-   else {   //W
-    letter = 'W';
-   }
-  }
-  else {   //H, U, V
-   
-  }
-  
-}else if (f3a>=fclose && f3b>=fclose){     //A, G, I, J, L, M, Q, S, T, X, Y, Z 
-  if (f2a<=fopen && f2b<=fopen){         //L, Z
-    if (f1a<=fopen){       //L
-      letter = 'L';
-    }
-    else{
-      letter = 'Z';
-    }
-  }
-  else if (f2a>=fclose && f2b>=fclose){     //A, I, J, M, S, Y
-    if (f1b>=fclose){      //I, J, M, S
-      if (f5a<=fopen){     //I, J
-        if (palm==moving){      //gyroscope movement
-          letter = 'J';
+  void classifyLetter() {
+    if (f3a<=fopen && f3b<=fopen){   //B,F,H,U,V,W
+      if (f2b>=fopen){       //F
+      letter = 'F';
+      }
+      else if (f4b<=fopen){   //B, W
+      if (f5a <= fopen){  //B
+        letter = 'B';
+      }
+      else {   //W
+        letter = 'W';
+      }
+      }
+      else {   //H, U, V
+      
+      }
+      
+    }else if (f3a>=fclose && f3b>=fclose){     //A, G, I, J, L, M, Q, S, T, X, Y, Z 
+      if (f2a<=fopen && f2b<=fopen){         //L, Z
+        if (f1a<=fopen){       //L
+          letter = 'L';
         }
         else{
-          letter = 'I';
+          letter = 'Z';
         }
       }
-      else{      //M,S
-        if (f4a <= ____ && f4b >= ____){    //M
-          letter = 'M';
+      else if (f2a>=fclose && f2b>=fclose){     //A, I, J, M, S, Y
+        if (f1b>=fclose){      //I, J, M, S
+          if (f5a<=fopen){     //I, J
+            if (palm==moving){      //gyroscope movement
+              letter = 'J';
+            }
+            else{
+              letter = 'I';
+            }
+          }
+          else{      //M,S
+            if (f4a <= ____ && f4b >= ____){    //M
+              letter = 'M';
+            }
+            else{     //S
+              letter = 'S';
+            }
+          }
         }
-        else{     //S
-          letter = 'S';
+        else{     //A, Y
+          if (f5a<=fopen){   //Y
+            letter = 'Y';
+          }
+          else{     //A
+            letter = 'A';
+          }
         }
       }
-    }
-    else{     //A, Y
-      if (f5a<=fopen){   //Y
-        letter = 'Y';
+      else{       //G, Q, T, X
+        if (f1a<=fopen && f1b<=fopen){    //G, Q
+          if (palm ){
+
+          }
+          else{
+
+          }
+        }
+        else{       //T, X
+          if (f2 ){
+
+          }
+          else{
+
+          }
+
+        }
       }
-      else{     //A
-        letter = 'A';
+    }else{     //C, D, E, K, N, O, P, R
+      if (f2a<=fopen && f2b<=fopen){      //D, K, P, R
+
       }
+      else if (f2a>=fclose && f2b>=fclose){   //N
+        letter = 'N';
+
+      }
+      else{     //C,E,O
+        if (f1a<=fopen && f1b<=fopen){    //C
+          letter = 'C';
+        }
+        else if (f1a>=fclose && f1b>=fclose){   //E
+          letter = 'E';
+        } 
+        else{    //O
+          letter = 'O';
+        }
+
+      }
+
+
     }
   }
-  else{       //G, Q, T, X
-    if (f1a<=fopen && f1b<=fopen){    //G, Q
-      if (palm ){
-
-      }
-      else{
-
-      }
-    }
-    else{       //T, X
-      if (f2 ){
-
-      }
-      else{
-
-      }
-
-    }
-  }
-
-}else{     //C, D, E, K, N, O, P, R
-
+  printf("Letter=", "%c", 'letter');
 }
-  
 }
