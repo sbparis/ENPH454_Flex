@@ -1,0 +1,107 @@
+int f1a, f1b, f2a, f2b, f3a, f3b, f4a, f4b, ft;
+int threshold_high_f1a = 800, threshold_high_f1b = 800, threshold_high_f2a = 800, threshold_high_f2b = 800;
+int threshold_high_f3a = 800, threshold_high_f3b = 800, threshold_high_f4a = 800, threshold_high_f4b = 800;
+int threshold_high_th = 800;
+
+int threshold_medium_f1a = 500, threshold_medium_f1b = 500, threshold_medium_f2a = 500, threshold_medium_f2b = 500;
+int threshold_medium_f3a = 500, threshold_medium_f3b = 500, threshold_medium_f4a = 500, threshold_medium_f4b = 500;
+int threshold_medium_th = 500;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(A0, INPUT); pinMode(A9, INPUT); pinMode(A2, INPUT); pinMode(A3, INPUT); 
+  pinMode(A4, INPUT); pinMode(A5, INPUT); pinMode(A6, INPUT); pinMode(A7, INPUT); 
+  pinMode(A8, INPUT);
+
+  // Thresholds for high and medium levels are already set
+}
+
+void loop() {
+  // Read analog values from sensors
+  f1a = analogRead(A0);
+  f2a = analogRead(A9);
+  f3a = analogRead(A2);
+  f4a = analogRead(A3);
+  ft = analogRead(A4);
+  f4b = analogRead(A5);
+  f3b = analogRead(A6);
+  f2b = analogRead(A7);
+  f1b = analogRead(A8);
+
+  // Check if finger 3 is bent enough
+  if (f2a > threshold_high_f2a && f2b > threshold_high_f2b) {
+    Serial.println("Moddle finger is bent enough (high threshold).");
+
+    // Check if finger 2 is bent enough (nested conditions)
+    if (f1a > threshold_high_f1a && f1b > threshold_high_f1b) {
+      if (ft > threshold_high_th) {
+        if (f4a > threshold_high_f4a && f4b > threshold_high_f4b) {
+          if (f3a > threshold_high_f3a && f3b > threshold_high_f3b) {
+            Serial.println("S")
+          }
+          else{
+            Serial.println("M");
+          }
+        
+        }
+        else{
+          if (mpu moving) {
+            Serial.println("J");
+          }
+          else{
+            Serial.println("I")
+          }
+
+        }
+      }
+      else {
+        if (f4a > threshold_high_f4a && f4b > threshold_high_f4b) {
+          serial.println("A")
+        }
+        else{
+          serial.println("Y")
+        }
+      
+      }
+    } 
+    else if (f1a > threshold_medium_f1a && f1b > threshold_medium_f1b &&
+             f1a <= threshold_high_f1a && f1b <= threshold_high_f1b) {
+      if (ft > threshold_high_th) {
+        if (f1a > threshold_high_f1a && f1b > threshold_high_f1b) {
+          serial.println("T")
+        }
+        else {
+          serial.println("X")
+        }
+
+      }
+      else {
+        if (mpu moving){
+          serial.print("Q")
+        }
+        else{
+          serial.print("G")
+        }
+
+      }
+    } 
+    else {
+      Serial.println("Finger 2 is not bent enough.");
+    }
+  } 
+  else if (f2a > threshold_medium_f2a && f3b > threshold_medium_f2b &&
+           f2a <= threshold_high_f2a && f2b <= threshold_high_f2b) {
+    Serial.println("Finger 3 is bent enough (medium threshold).");
+  } 
+  else {
+    Serial.println("Finger 3 is not bent enough.");
+  }
+
+  // Optional: Print values for debugging
+  Serial.print("f3a: "); Serial.print(f3a);
+  Serial.print(", f3b: "); Serial.println(f3b);
+  Serial.print("f2a: "); Serial.print(f2a);
+  Serial.print(", f2b: "); Serial.println(f2b);
+
+  delay(500); // Delay for readability in the serial monitor
+}
