@@ -69,8 +69,106 @@ void calculateMaxValues(float maxValues[]) {
 
 // Placeholder for the function to categorize the movement as a letter
 char categorizeRead(float maxValues[]) {
+  if (f2a > threshold_high_f2a && f2b > threshold_high_f2b) {
+    // Check if middle finger is bent enough (high threshold)
+    if (f1a > threshold_high_f1a && f1b > threshold_high_f1b) {
+        if (ft > threshold_high_th) {
+            if (f4a > threshold_high_f4a && f4b > threshold_high_f4b) {
+                if (f3a > threshold_high_f3a && f3b > threshold_high_f3b) {
+                    return "S";
+                } else {
+                    return "M";
+                }
+            } else {
+                if (mpu_moving) {
+                    return "J";
+                } else {
+                    return "I";
+                }
+            }
+        } else {
+            if (f4a > threshold_high_f4a && f4b > threshold_high_f4b) {
+                return "A";
+            } else {
+                return "Y";
+            }
+        }
+    } else if (f1a > threshold_medium_f1a && f1b > threshold_medium_f1b &&
+               f1a <= threshold_high_f1a && f1b <= threshold_high_f1b) {
+        if (ft > threshold_high_th) {
+            if (f1a > threshold_high_f1a && f1b > threshold_high_f1b) {
+                return "T";
+            } else {
+                return "X";
+            }
+        } else {
+            if (mpu_moving) {
+                return "Q";
+            } else {
+                return "G";
+            }
+        }
+    } else {
+        if (ft > threshold_high_th) {
+            return "Z";
+        } else {
+            return "L";
+        }
+    }
+} else if (f2a > threshold_medium_f2a && f3b > threshold_medium_f2b &&
+           f2a <= threshold_high_f2a && f2b <= threshold_high_f2b) {
+    if (f1a > threshold_high_f1a && f1b > threshold_high_f1b) {
+        return "N";
+    } else if (f1a > threshold_medium_f1a && f1b > threshold_medium_f1b &&
+               f1a <= threshold_high_f1a && f1b <= threshold_high_f1b) {
+        if (ft > threshold_high_th) {
+            return "E";
+        } else if (ft > threshold_medium_th && ft <= threshold_high_th) {
+            return "D";
+        } else {
+            return "C";
+        }
+    } else {
+        if (f3a > threshold_high_f3a && f3b > threshold_high_f3b) {
+            if (f2a > threshold_high_f2a && f2b > threshold_high_f2b) {
+                return "R";
+            } else {
+                if (mpu_moving) {
+                    return "P";
+                } else {
+                    return "K";
+                }
+            }
+        } else {
+            return "D";
+        }
+    }
+} else {
+    if (f1a > threshold_medium_f1a && f1b > threshold_medium_f1b) {
+        return "F";
+    } else {
+        if (f3a > threshold_high_f3a && f3b > threshold_high_f3b) {
+            if (f1a > threshold_medium_f1a && f1b > threshold_medium_f1b &&
+                f2a > threshold_medium_f2a && f2b > threshold_medium_f2b) {
+                return "V";
+            } else {
+                if (mpu_moving) {
+                    return "H";
+                } else {
+                    return "U";
+                }
+            }
+        } else {
+            if (f4a > threshold_high_f4a && f4b > threshold_high_f4b) {
+                return "W";
+            } else {
+                return "B";
+            }
+        }
+    }
+}
   // Implement categorization logic based on maxValues
   // For now, return a placeholder character
-  return 'A';
+  
 }
 
