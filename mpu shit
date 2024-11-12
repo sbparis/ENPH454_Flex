@@ -1,0 +1,68 @@
+#include "I2Cdev.h"
+#include "MPU6050.h"
+
+MPU6050 mpu;
+
+#define OUTPUT_READABLE_ACCELGYRO
+
+int16_t ax, ay, az;
+int16_t gx, gy, gz;
+int16_t prev_ax = 0, prev_ay = 0, prev_az = 0; // Previous accelerometer values
+int16_t prev_gx = 0, prev_gy = 0, prev_gz = 0; // Previous gyroscope values
+bool blinkState;
+
+void setup() {
+  #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+    Wire.begin(); 
+  #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
+    Fastwire::setup(400, true);
+  #endif
+
+  Serial.begin(38400);
+
+  Serial.println("Initializing MPU...");
+  mpu.initialize();
+  Serial.println("Testing MPU6050 connection...");
+  if (mpu.testConnection() == false) {
+    Serial.println("MPU6050 connection failed");
+    while (true);
+  } else {
+    Serial.println("MPU6050 connection successful");
+  }
+
+  pinMode(LED_BUILTIN, OUTPUT);
+}
+
+void loop() {
+  mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+
+  // Calculate differences between current and previous readings
+  int16_t diff_ax = ax - prev_ax;
+  int16_t diff_ay = ay - prev_ay;
+  int16_t diff_az = az - prev_az;
+  int16_t diff_gx = gx - prev_gx;
+  int16_t diff_gy = gy - prev_gy;
+  int16_t diff_gz = gz - prev_gz;
+
+  // Print the differences
+  #ifdef OUTPUT_READABLE_ACCELGYRO
+    Serial.print("Difference a/g:\t");
+    Serial.print(diff_ax); Serial.print("\t");
+    Serial.print(diff_ay); Serial.print("\t");
+    Serial.print(diff_az); Serial.print("\t");
+    Serial.print(diff_gx); Serial.print("\t");
+    Serial.print(diff_gy); Serial.print("\t");
+    Serial.println(diff_gz);
+  #endif
+
+  // Update previous values for the next loop
+  prev_ax = ax;
+  prev_ay = ay;
+  prev_az = az;
+  prev_gx = gx;
+  prev_gy = gy;
+  prev_gz = gz;
+
+  blinkState = !blinkState;
+  digitalWrite(LED_BUILTIN, blinkState);
+}
