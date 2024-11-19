@@ -1,39 +1,65 @@
+#include "I2Cdev.h"
+#include "MPU6050.h"
+
+MPU6050 mpu;
+
+#define OUTPUT_READABLE_ACCEL
+
 const int maxReadings = 100; // Define max number of readings per movement
-float readingsArray[maxReadings][9]; // 2D array for 9 sensors and maxReadings rows
+float readingsArray[10]; // 2D array for 9 sensors and maxReadings rows
 int currentReading = 0; // Track the current number of readings
 float minThreshold[9] = {}
+float accel[3];
+int16_t ax, ay, az;
+int16_t prev_ax = 0, prev_ay = 0, prev_az = 0;
 
 void setup() {
+  #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+    Wire.begin(); 
+  #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
+    Fastwire::setup(400, true);
+  #endif
+
   Serial.begin(9600);
   // Set the pin modes for analog inputs
   pinMode(A15, INPUT); pinMode(A14, INPUT); pinMode(A13, INPUT); pinMode(A12, INPUT); 
   pinMode(A11, INPUT); pinMode(A9, INPUT); pinMode(A10, INPUT); pinMode(A7, INPUT); 
   pinMode(A8, INPUT); 
+
+  mpu.initialize();
 }
 
 void loop() {
   float* readings = ReadVoltages();
   if (readings != nullptr) { // Valid readings returned
-      if (currentReading < maxReadings) { // Add reading if within limit
-        for (int i = 0; i < 9; i++) {
-          readingsArray[currentReading][i] = readings[i]; // Store each sensor reading
-        }
-        currentReading++;
-      }
+    for (int i = 0; i < 9; i++) {
+      if (readings[i] > readingsArray[i]) {
+        readingsArray[i] = readings[i];
+      }; // Store each sensor reading
+    }
+    readings[10] += sqrt((accel[1]*accel[1]) + (accel[2]*accel[2]) + (accel[3]*accel[3]));
+    currentReading++;
   } else if (currentReading > 0) { // If glove was in motion and now at rest
-    float maxValues[9];
-    calculateMaxValues(maxValues); // Get max values for movement
-    char detectedLetter = categorizeRead(maxValues); // Categorize the movement
+    char detectedLetter = categorizeRead(readingsArray); // Categorize the movement
     Serial.print("Detected Letter: ");
     Serial.println(detectedLetter);
+  for (int i = 0; i < 10; i++) {
+    Serial.print("readingsArray[");
+    Serial.print(i);
+    Serial.print("] = ");
+    Serial.println(readingsArray[i]);
+  }
+}    
     currentReading = 0; // Reset for the next movement
+    memset(readingsArray, 0, sizeof(readingsArray));
   } // Update to indicate motion
-  delay(500); // Wait 500ms before updating again
+  delay(100); // Wait 500ms before updating again
 }
 
 // Function to read analog pins and return array of voltages
 float* ReadVoltages() {
   static float values[9];
+  bool ret = true;
   
   // Read analog values from sensors
   values[0] = analogRead(A15);
@@ -46,25 +72,29 @@ float* ReadVoltages() {
   values[7] = analogRead(A7);
   values[8] = analogRead(A8);
 
+  mpu.getAcceleration(&ax, &ay, &az);
+
+  int16_t diff_ax = ax - prev_ax;
+  int16_t diff_ay = ay - prev_ay;
+  int16_t diff_az = az - prev_az;
+
+  prev_ax = ax;
+  prev_ay = ay;
+  prev_az = az;
+
   // Check for any invalid readings
   for (int i = 0; i < 9; i++) {
-    if (values[i] > minThreshold[i]) {
-      return values;
+    if (values[i] < minThreshold[i]) {
+      ret = false;
     }
+  }
+  if(ret){
+    accel[0] = diff_ax;
+    accel[1] = diff_ay;
+    accel[2] = diff_az;
+    return values;
   }
   return nullptr;
-}
-
-// Function to calculate max values from each sensor column in readingsArray
-void calculateMaxValues(float maxValues[]) {
-  for (int i = 0; i < 9; i++) {
-    maxValues[i] = readingsArray[0][i]; // Initialize with the first reading
-    for (int j = 1; j < currentReading; j++) {
-      if (readingsArray[j][i] > maxValues[i]) {
-        maxValues[i] = readingsArray[j][i];
-      }
-    }
-  }
 }
 
 // Placeholder for the function to categorize the movement as a letter
@@ -80,7 +110,7 @@ char categorizeRead(float maxValues[]) {
                     return "M";
                 }
             } else {
-                if (mpu_moving) {
+                if (maxValues[10] > accel_I) {
                     return "J";
                 } else {
                     return "I";
@@ -102,7 +132,7 @@ char categorizeRead(float maxValues[]) {
                 return "X";
             }
         } else {
-            if (mpu_moving) {
+            if (maxValues[10 > accel_G]) {
                 return "Q";
             } else {
                 return "G";
@@ -133,7 +163,7 @@ char categorizeRead(float maxValues[]) {
               if (maxValues[7] > threshold_high_middle_upper && maxValues[1] > threshold_high_lower_middle) {
                   return "R";
               } else {
-                  if (mpu_moving) {
+                  if (maxValues[10] > accel_k) {
                       return "P";
                   } else {
                       return "K";
@@ -152,7 +182,7 @@ char categorizeRead(float maxValues[]) {
                   maxValues[7] > threshold_medium_middle_upper && maxValues[1] > threshold_medium_f2b) {
                   return "V";
               } else {
-                  if (mpu_moving) {
+                  if (maxValues[10] > accel_U) {
                       return "H";
                   } else {
                       return "U";
