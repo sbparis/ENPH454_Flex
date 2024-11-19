@@ -6,7 +6,7 @@ MPU6050 mpu;
 #define OUTPUT_READABLE_ACCEL
 
 const int maxReadings = 100; // Define max number of readings per movement
-float readingsArray[10]; // 2D array for 9 sensors and maxReadings rows
+float readingsArray[11]; // 2D array for 9 sensors and maxReadings rows
 int currentReading = 0; // Track the current number of readings
 float minThreshold[9] = {}
 float accel[3];
@@ -37,7 +37,13 @@ void loop() {
         readingsArray[i] = readings[i];
       }; // Store each sensor reading
     }
-    readings[10] += sqrt((accel[1]*accel[1]) + (accel[2]*accel[2]) + (accel[3]*accel[3]));
+    accele = sqrt((accel[1]*accel[1]) + (accel[2]*accel[2]) + (accel[3]*accel[3]));
+    if (accel > readings[9]) {
+        readings[9] = accele;
+    }
+    if (accel[2] > readings[10]){
+      readings[10] = accel[2];
+    }
     currentReading++;
   } else if (currentReading > 0) { // If glove was in motion and now at rest
     char detectedLetter = categorizeRead(readingsArray); // Categorize the movement
@@ -110,7 +116,7 @@ char categorizeRead(float maxValues[]) {
                     return "M";
                 }
             } else {
-                if (maxValues[10] > accel_I) {
+                if (maxValues[9] > 5000) {
                     return "J";
                 } else {
                     return "I";
@@ -132,7 +138,7 @@ char categorizeRead(float maxValues[]) {
                 return "X";
             }
         } else {
-            if (maxValues[10 > accel_G]) {
+            if (maxValues[10] > MAXIMUM Y ACCELERATION]) {
                 return "Q";
             } else {
                 return "G";
@@ -163,7 +169,7 @@ char categorizeRead(float maxValues[]) {
               if (maxValues[7] > threshold_high_middle_upper && maxValues[1] > threshold_high_lower_middle) {
                   return "R";
               } else {
-                  if (maxValues[10] > accel_k) {
+                  if (maxValues[9] > 6500) {
                       return "P";
                   } else {
                       return "K";
@@ -173,8 +179,7 @@ char categorizeRead(float maxValues[]) {
               return "D";
           }
       }
-  } else {
-      if (maxValues[8] > threshold_medium_f1a && maxValues[0] > threshold_medium_f1b) {
+  } else if (maxValues[8] > threshold_medium_f1a && maxValues[0] > threshold_medium_f1b) {
           return "F";
       } else {
           if (maxValues[6] > threshold_high_f3a && maxValues[2] > threshold_high_f3b) {
@@ -182,7 +187,7 @@ char categorizeRead(float maxValues[]) {
                   maxValues[7] > threshold_medium_middle_upper && maxValues[1] > threshold_medium_f2b) {
                   return "V";
               } else {
-                  if (maxValues[10] > accel_U) {
+                  if (maxValues[9] > 3000) {
                       return "H";
                   } else {
                       return "U";
@@ -196,6 +201,7 @@ char categorizeRead(float maxValues[]) {
               }
           }
       }
+  } else {
+    return NULL;
   }
 }
-
