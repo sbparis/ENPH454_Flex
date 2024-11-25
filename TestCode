@@ -1,0 +1,213 @@
+#include "I2Cdev.h"
+#include "MPU6050.h"
+
+// Create an instance of the MPU6050 sensor
+MPU6050 mpu;
+
+#define OUTPUT_READABLE_ACCEL // Macro for defining readable acceleration output
+
+// Constants and global variables
+const int maxReadings = 100; // Maximum number of readings per movement
+float values[11];
+float readingsArray[11];     // Array to store maximum readings for each sensor (9 sensors + 2 derived metrics)
+int currentReading = 0;      // Counter for the current number of readings
+float minThreshold[9] = {};  // Threshold array to define the minimum valid reading per sensor
+float accel[3];              // Array to store acceleration differences
+int16_t ax, ay, az;          // Variables to hold raw accelerometer values
+int16_t prev_ax = 0, prev_ay = 0, prev_az = 0; // Variables to store previous accelerometer readings
+
+const float threshold_high_th = 795;
+const float threshold_high_f1a = 720;
+const float threshold_high_f1b = 610;
+const float threshold_high_f2a = 810;
+const float threshold_high_f2b = 680;
+const float threshold_high_f3a = 810;
+const float threshold_high_f3b = 630;
+const float threshold_high_f4a = 720;
+const float threshold_high_f4b = 730;
+
+const float threshold_medium_th = 690;
+const float threshold_medium_f1a = 610;
+const float threshold_medium_f1b = 550;
+const float threshold_medium_f2a = 710;
+const float threshold_medium_f2b = 605;
+const float threshold_medium_f3a = 675;
+const float threshold_medium_f3b = 600;
+const float threshold_medium_f4a = 610;
+const float threshold_medium_f4b = 683;
+
+void setup() {
+  // Initialize I2C communication
+  #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+    Wire.begin(); 
+  #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
+    Fastwire::setup(400, true);
+  #endif
+
+  Serial.begin(9600); // Start serial communication at 9600 baud
+
+  // Set the pin modes for analog inputs
+  pinMode(A15, INPUT); pinMode(A14, INPUT); pinMode(A13, INPUT); pinMode(A12, INPUT); 
+  pinMode(A11, INPUT); pinMode(A9, INPUT); pinMode(A10, INPUT); pinMode(A7, INPUT); 
+  pinMode(A8, INPUT);
+
+  mpu.initialize(); // Initialize the MPU6050 sensor
+}
+
+
+void printValues(float values[], int size) {
+  Serial.print("Values: ");
+  for (int i = 0; i < size; i++) {
+    Serial.print("Index ");
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.print(values[i]);
+    if (i < size - 1) {
+      Serial.print(", ");
+    }
+  }
+  Serial.println(); // Move to a new line after printing all values
+}
+
+char categorizeRead(float maxValues[]) {
+  // The logic below categorizes the gesture by comparing sensor values against thresholds
+  // and returns the corresponding letter. Threshold variables are placeholders and should
+  // be defined with actual values based on the gesture classification criteria.
+
+  // Example logic for gesture recognition (should be customized):
+  if (maxValues[7] > threshold_high_f2a && maxValues[1] > threshold_high_f2b) {
+    // Check if middle finger is bent enough (high threshold)
+    if (maxValues[8] > threshold_high_f1a && maxValues[0] > threshold_high_f1b) {
+        if (maxValues[4] > threshold_high_th) {
+            if (maxValues[5] > threshold_high_f4a && maxValues[3] > threshold_high_f4b) {
+                if (maxValues[6] > threshold_high_f3a && maxValues[2] > threshold_high_f3b) {
+                  if (maxValues[7] > threshold_high_f2a && maxValues[1] > threshold_high_f2b){
+                    return "S";
+                  }
+                  else{
+                    return "N";
+                  }
+                } else {
+                    return "M";
+                }
+            } else {
+                if (maxValues[9] > 5000) {
+                    return "J";
+                } else {
+                    return "I";
+                }
+            }
+        } else {
+            if (maxValues[5] > threshold_high_f4a && maxValues[3] > threshold_high_f4b) {
+                return "A";
+            } else {
+                return "Y";
+            }
+        }
+    } else if (maxValues[8] > threshold_medium_f1a && maxValues[0] > threshold_medium_f1b &&
+               maxValues[8] <= threshold_high_f1a && maxValues[0] <= threshold_high_f1b) {
+        if (maxValues[4] > threshold_high_th) {
+            if (maxValues[0] > threshold_medium_f1b) {
+                return "T";
+            } else {
+                return "X";
+            }
+        } else {
+            if (maxValues[10] > -5000) {
+                return "Q";
+            } else {
+                return "G";
+            }
+        }
+    } else {
+        if (maxValues[4] > threshold_high_th) {
+            return "Z";
+        } else {
+            return "L";
+        }
+    }
+  } else if (maxValues[7] > threshold_medium_f2a && maxValues[2] > threshold_medium_f2b &&
+            maxValues[7] <= threshold_high_f2a && maxValues[1] <= threshold_high_f2b) {
+      if (maxValues[8] > threshold_medium_f1a && maxValues[0] > threshold_medium_f1b &&
+                maxValues[8] <= threshold_high_f1a && maxValues[0] <= threshold_high_f1b) {
+          if (maxValues[4] > threshold_high_th) {
+              return "E";
+          } else if (maxValues[4] > threshold_medium_th && maxValues[4] <= threshold_high_th) {
+              return "D";
+          } else {
+              return "C";
+          }
+      } else {
+          if (maxValues[6] > threshold_high_f3a && maxValues[2] > threshold_high_f3b) {
+              if (maxValues[7] > threshold_high_f2a && maxValues[1] > threshold_high_f2b) {
+                  return "R";
+              } else {
+                  if (maxValues[9] > 6500) {
+                      return "P";
+                  } else {
+                      return "K";
+                  }
+              }
+          } else {
+              return "D";
+          }
+      }
+  } else if (maxValues[7] < threshold_medium_f2a && maxValues[1] < threshold_medium_f2b){
+    if (maxValues[8] > threshold_medium_f1a && maxValues[0] > threshold_medium_f1b){
+      return "F";
+    }
+    else{
+      if (maxValues[6] > threshold_high_f3a && maxValues[2] > threshold_high_f3b) {
+        if (maxValues[8] > threshold_medium_f1a && maxValues[0] > threshold_medium_f1b &&
+            maxValues[7] > threshold_medium_f2a && maxValues[1] > threshold_medium_f2b) {
+              return "V";
+              }
+              else {
+                if (maxValues[9] > 4000){
+                  return "H";
+                } else {
+                  return "U";
+                }
+              }
+      } else {
+        if (maxValues[5] > threshold_high_f4a && maxValues[3] > threshold_high_f4b) {
+                  return "W";
+              } else {
+                  return "B";
+              }
+      }
+
+    }
+  } else {
+    return '\0';
+  }
+}
+
+void loop(){
+  values[0] = analogRead(A15);
+  values[1] = analogRead(A14);
+  values[2] = analogRead(A13);
+  values[3] = analogRead(A12);
+  values[4] = analogRead(A11);
+  values[5] = analogRead(A9);
+  values[6] = analogRead(A10);
+  values[7] = analogRead(A7);
+  values[8] = analogRead(A8);
+  mpu.getAcceleration(&ax, &ay, &az);
+
+  // Calculate the difference between current and previous readings
+  int16_t diff_ax = ax - prev_ax;
+  int16_t diff_ay = ay - prev_ay;
+  int16_t diff_az = az - prev_az;
+  int16_t accel2 = sqrt((diff_ax * diff_ax) + (diff_ay* diff_ay) + (diff_az * diff_az));
+  values[9] = accel2;
+  values[10] = diff_az;
+
+  printValues(values, 11);
+
+  
+
+  char detectedLetter = categorizeRead(values);
+  Serial.print("Detected Letter: ");
+  Serial.println(detectedLetter); // Output detected letter
+}
