@@ -19,6 +19,8 @@ int16_t prev_ax = 0, prev_ay = 0, prev_az = 0; // Variables to store previous ac
 const float threshold_high_th = 795;
 const float threshold_high_f2a = 810;
 const float threshold_high_f2b = 680;
+const float threshold_high_f3a = 810;
+const float threshold_high_f3b = 630;
 const float threshold_v_f1 = [];
 const float threshold_v_f2 = [];
 const float threshold_r_f2 = [];
@@ -45,43 +47,42 @@ void setup() {
     // Check if middle finger is over halfway bent
     if (maxValues[1] > threshold_half_f1a && maxValues[2] > threshold_half_f1b) {
       //check if pointer finger is over halfway bent
-        if (maxValues[0] > threshold_half_th) {
-          //check if thumb is over halfway bent
-            if (maxValues[7] > threshold_half_f4a && maxValues[8] > threshold_half_f4b) {
-              //check if pinky is over halfway bent
-                if (maxValues[5] > threshold_half_f3a && maxValues[6] > threshold_half_f3b) {
-                  //check if ring finger is over halfway bent
-                  if (maxValues[1] > threshold_high_f2a || maxValues[2] > threshold_high_f2b) {
-                    //check if pointer finger is very bent
-                    return "S";
-                  }
-                  else if (maxValues[5] > threshold_high_f2a || maxValues[6] > threshold_high_f2b) {
-                    //check if ring finger is very bent and pointer finger not very bent
-                    return "N";
-                  }
-                } else {
-                  //ring finger and pointer finger not very bent
-                    return "M";
-                }
-            } else {
-              //pinky under halfway bent
-                if (maxValues[9] > 5000) {
-                  //check if there is movement
-                    return "J";
-                } else {
-                  //no movement
-                    return "I";
-                }
+      if (maxValues[0] > threshold_half_th) {
+        //check if thumb is over halfway bent
+        if (maxValues[7] > threshold_half_f4a && maxValues[8] > threshold_half_f4b) {
+          //check if pinky is over halfway bent
+          if (maxValues[5] > threshold_high_f3a && maxValues[6] > threshold_high_f3b) {
+            //check if ring finger is very bent
+            if (maxValues[1] > threshold_high_f2a || maxValues[2] > threshold_high_f2b) {
+              //check if pointer finger is very bent
+              return "S";
+            } else{
+              //pointer finger not very bent
+              return "N";
             }
+          }else {
+              //ring finger not very bent
+              return "M";
+              }
         } else {
-          //thumb under halfway bent
-            if (maxValues[7] > threshold_half_f4a && maxValues[8] > threshold_half_f4b) {
-              //check if pinky is over halfway bent
-                return "A";
-            } else {
-              //pinky is not very bent
-                return "Y";
+          //pinky under halfway bent
+          if (maxValues[9] > 5000) {
+            //check if there is movement
+            return "J";
+          } else {
+            //no movement
+            return "I";
             }
+         }
+      } else {
+        //thumb under halfway bent
+        if (maxValues[7] > threshold_half_f4a && maxValues[8] > threshold_half_f4b) {
+          //check if pinky is over halfway bent
+          return "A";
+        } else {
+          //pinky is not very bent
+          return "Y";
+          }
         }
     } else if (maxValues[1] < threshold_half_f1a && maxValues[2] < threshold_half_f1b) {                      //double check this fully straight logic
       //pointer finger is not over halfway bent, check if pointer finger is fully straight
@@ -107,12 +108,12 @@ void setup() {
           //thumb is under halfway bent
             if (maxValues[10] > -5000) {
               //check if z acceleration is over threshold for orientation
-                return "Q";
-            } else {
+              return "Q";
+              } else {
                 return "G";
-            }
+                }
+           }
         }
-    }
   } else if (maxValues[3] < threshold_half_f2a && maxValues[4] > threshold_half_f2b) {
     //middle finger not over halfway bent, check if only middle finger base is bent
     if (maxValues[5] > threshold_half_f3a && maxValues[6] > threshold_half_f3b){
@@ -122,8 +123,8 @@ void setup() {
         return "P";
       } else{
         //no movement
-        return "K";
-      }
+          return "K";
+        }
     } else{
       //ring finger under halfway bent
       return "D";
@@ -139,7 +140,7 @@ void setup() {
     } else{
       //thumb is neither fully bent or fully straight
       return "O";
-    }
+      }
   } else if(maxValues[3] < threshold_half_f2a && maxValues[4] < threshold_half_f2b) {
     //check if middle finger is fully straight
     if (maxValues[2] > threshold_half_f1a){
@@ -148,28 +149,29 @@ void setup() {
     } else{
       //pointer finger is mostly straight
       if (maxValues[5] > threshold_half_f3a && maxValues[6] > threshold_half_f3b) {           //this will be a huge problem 
-        //check if ring finger is over halfway bent, H U V R
-        if(maxValues[3] > threshold_v_f1 && maxValues[4] > threshold_v_f2){
-          //check if pointer and middle finger base is over the V threshold
-          return "V";
-        } else if (maxValues[3] > threshold_r_f2){
-          //check if middle finger tip is over the R threshold
-          return "R";
-        } else{
-          //neither R nor V thresholds met
-          if (maxValues[9] > 4000){
-            //check if there is movement
-            return "H";
-            } else {
-              //no movement
-              return "U";
-              }
+      //check if ring finger is over halfway bent, H U V R
+      if(maxValues[3] > threshold_v_f1 && maxValues[4] > threshold_v_f2){
+        //check if pointer and middle finger base is over the V threshold
+        return "V";
+      } else if (maxValues[3] > threshold_r_f2){
+        //check if middle finger tip is over the R threshold
+        return "R";
+      } else{
+        //neither R nor V thresholds met
+        if (maxValues[9] > 4000){
+          //check if there is movement
+          return "H";
+        } else {
+          //no movement
+          return "U";
+          }
         }
       }
     }
   } else {
     //null case
     return "null";
+    }
   }
 }
 
@@ -195,6 +197,14 @@ void loop(){
   values[10] = diff_az;
 
   printValues(values, 11);
+
+  
+
+  char detectedLetter = categorizeRead(values);
+  Serial.print("Detected Letter: ");
+  Serial.println(detectedLetter); // Output detected letter
+}
+
 
   
 
