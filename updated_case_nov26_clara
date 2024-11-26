@@ -21,9 +21,9 @@ const float threshold_high_f2a = 810;
 const float threshold_high_f2b = 680;
 const float threshold_high_f3a = 810;
 const float threshold_high_f3b = 630;
-const float threshold_v_f1 = [];
-const float threshold_v_f2 = [];
-const float threshold_r_f2 = [];
+const float threshold_v_f1 = 600;
+const float threshold_v_f2 = 670;
+const float threshold_r_f2 = 660;
 
 const float threshold_half_th = 690;
 const float threshold_half_f1a = 610;
@@ -36,6 +36,37 @@ const float threshold_half_f4a = 610;
 const float threshold_half_f4b = 683;
 
 void setup() {
+  // Initialize I2C communication
+  #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+    Wire.begin(); 
+  #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
+    Fastwire::setup(400, true);
+  #endif
+
+  Serial.begin(9600); // Start serial communication at 9600 baud
+
+  // Set the pin modes for analog inputs
+  pinMode(A15, INPUT); pinMode(A14, INPUT); pinMode(A13, INPUT); pinMode(A12, INPUT); 
+  pinMode(A11, INPUT); pinMode(A9, INPUT); pinMode(A10, INPUT); pinMode(A7, INPUT); 
+  pinMode(A8, INPUT);
+
+  mpu.initialize(); // Initialize the MPU6050 sensor
+}
+
+void printValues(float values[], int size) {
+  Serial.print("Values: ");
+  for (int i = 0; i < size; i++) {
+    Serial.print("Index ");
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.print(values[i]);
+    if (i < size - 1) {
+      Serial.print(", ");
+    }
+  }
+  Serial.println(); // Move to a new line after printing all values
+}
+
 
   char categorizeRead(float maxValues[]) {
   // The logic below categorizes the gesture by comparing sensor values against thresholds
@@ -170,10 +201,9 @@ void setup() {
     }
   } else {
     //null case
-    return "null";
+    return "-";
     }
   }
-}
 
 void loop(){
   values[0] = analogRead(A11);    //thumb
@@ -197,14 +227,6 @@ void loop(){
   values[10] = diff_az;
 
   printValues(values, 11);
-
-  
-
-  char detectedLetter = categorizeRead(values);
-  Serial.print("Detected Letter: ");
-  Serial.println(detectedLetter); // Output detected letter
-}
-
 
   
 
