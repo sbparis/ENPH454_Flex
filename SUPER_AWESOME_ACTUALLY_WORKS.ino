@@ -81,8 +81,8 @@ void printValues(float values[], int size) {
       //check if pointer finger is over halfway bent
       if (maxValues[0] > threshold_half_th) {
         //check if thumb is over halfway bent
-        if (maxValues[7] > threshold_half_f4a && maxValues[8] > threshold_half_f4b) {
-          //check if pinky is over halfway bent
+        if (maxValues[7] > threshold_half_f4a) {
+          //check if pinky tip is over halfway bent
           if (maxValues[5] > threshold_high_f3a && maxValues[6] > threshold_high_f3b) {
             //check if ring finger is very bent
             if (maxValues[4] > threshold_high_f2b) {
@@ -100,7 +100,7 @@ void printValues(float values[], int size) {
               return 77;
               }
         } else {
-          //pinky under halfway bent
+          //pinky tip under halfway bent
           if (maxValues[9] > 7000) {
             //check if there is movement
             Serial.print("J");
@@ -114,11 +114,13 @@ void printValues(float values[], int size) {
       } else {
         //thumb under halfway bent
         if (maxValues[7] > threshold_half_f4a && maxValues[8] > threshold_half_f4b) {
+          //check if pinky finger is over halfway bent
           if (maxValues[2] > threshold_half_f2b){
-            //check if pinky is over halfway bent
+            //check if pointer base over halfway bent
             Serial.print("A");
             return 65;
           } else {
+            //pointer base under halfway bent
             Serial.print("T");
             return 84;
           }
@@ -128,7 +130,7 @@ void printValues(float values[], int size) {
           return 89;
           }
         }
-    } else if (maxValues[1] < threshold_half_f1a && maxValues[2] < threshold_half_f1b) {                      //double check this fully straight logic
+    } else if (maxValues[1] < threshold_half_f1a && maxValues[2] < threshold_half_f1b) {
       //pointer finger is not over halfway bent, check if pointer finger is fully straight
         if (maxValues[0] > threshold_half_th) {
           //check if thumb is over halfway bent
@@ -159,7 +161,6 @@ void printValues(float values[], int size) {
       }
   } else if (maxValues[3] < threshold_half_f2a && maxValues[4] > threshold_half_f2b) {
     //middle finger not over halfway bent, check if only middle finger base is bent
-      //check if ring finger is over halfway bent
     if(maxValues[9] > 7000){
       //check for movement
       Serial.print("P");
@@ -172,6 +173,7 @@ void printValues(float values[], int size) {
   } else if (maxValues[3] > threshold_half_f2a && maxValues[4] < threshold_half_f2b) {
     //check if only middle finger tip is over halfway bent
     if (maxValues[1] > threshold_half_f1a) {
+      //check if pointer tip is over halfway bent
       if(maxValues[0] > threshold_high_th){
         //check if thumb is very bent
         Serial.print("E");
@@ -186,25 +188,20 @@ void printValues(float values[], int size) {
         return 79;
       }
     } else{
-      //ring finger under halfway bent
+      //poniter tip under halfway bent
       Serial.print("D");
       return 68;
     }
   } else {
-    //check if middle finger is fully straight
-    if (maxValues[5] > threshold_half_f3a && maxValues[6] > threshold_half_f3b){
-      //check if ring finger is over halfway bent
-    }else{
-      //ring finger not very bent
-    }
+    //middle finger is fully straight
     if (maxValues[1] > threshold_half_f1a){
-      //check if pointer finger tip is over halfway bent
+      //check if pointer tip is over halfway bent
       Serial.print("F");
       return 70;
     } else{
-      //pointer finger is mostly straight
-      if (maxValues[5] > threshold_half_f3a) {          //this will be huge problem 
-        //check if ring finger is over halfway bent, H U V R
+      //pointer tip is under halfway bent
+      if (maxValues[5] > threshold_half_f3a) {
+        //check if ring tip is over halfway bent, H U V R
         if(maxValues[2] > 520 && maxValues[4] > 525){
         //check if pointer and middle finger base is over the V threshold
         Serial.print("V");
@@ -226,16 +223,19 @@ void printValues(float values[], int size) {
           }
         } 
       } else{
-        //ring finger is not very bent
+        //ring tip is under halfway bent
         if(maxValues[7] > threshold_half_f4a){
-          //check if pinky finger is more than halfway closed
+          //check if pinky tip is over halfway bent
           Serial.print("W");
           return 87;
         } else {
+          //pinky tip is under halfway bent
           if (maxValues[0] < threshold_half_th) {
+            //check if thumb is fully straight
             Serial.print("NULL");
             return 0;
           } else{
+            //thumb is bent
             Serial.print("B");
             return 66;
           }
