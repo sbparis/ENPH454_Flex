@@ -310,6 +310,7 @@ void loop(){
     if(array_char[i]=='Y') count_Y ++;
     if(array_char[i]=='Z') count_Z ++;
     if((int)array_char[i]==0) count_NULL ++;
+    delay(50);
   }
 
   int count_array = [count_A, count_B, count_C, count_D, count_E, count_F, count_G, count_H, count_I, count_J, count_K, count_L, count_M, count_N, count_O, count_P, count_Q, count_R,
