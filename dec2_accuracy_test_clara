@@ -272,7 +272,6 @@ void loop(){
 
   printValues(values, 11);
 
-  int array_int[50];
   char array_char[50];
   int count_A = 0; int count_B = 0; int count_C = 0; int count_D = 0; int count_E = 0;
   int count_F = 0; int count_G = 0; int count_H = 0; int count_I = 0; int count_J = 0;
@@ -309,7 +308,7 @@ void loop(){
     if(array_char[i]=='X') count_X ++;
     if(array_char[i]=='Y') count_Y ++;
     if(array_char[i]=='Z') count_Z ++;
-    if((int)array_char[i]==0) count_NULL ++;
+    if(array_char[i]==(char)0) count_NULL ++;
     delay(50);
   }
 
