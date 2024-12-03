@@ -12,7 +12,7 @@ float values[11];
 float values2[11];
 float readingsArray[11];     // Array to store maximum readings for each sensor (9 sensors + 2 derived metrics)
 int currentReading = 0;      // Counter for the current number of readings
-float minThreshold[] = {640, 580, 520, 570, 530, 650, 580, 580, 650};  // Threshold array to define the minimum valid reading per sensor
+float minThreshold[] = {660, 600, 540, 590, 550, 670, 600, 590, 670};  // Threshold array to define the minimum valid reading per sensor
 float accel[3];              // Array to store acceleration differences
 int16_t ax, ay, az;          // Variables to hold raw accelerometer values
 int16_t prev_ax = 0, prev_ay = 0, prev_az = 0; // Variables to store previous accelerometer readings
@@ -268,7 +268,7 @@ void loop(){
   values2[8] = analogRead(A12);    //pinky base
 
   
-  while (values[0] > minThreshold[0] || values[1] > minThreshold[1] || values[2] > minThreshold[2] || values[3] > minThreshold[3] || values[4] > minThreshold[4] || values[5] > minThreshold[5] || values[6] > minThreshold[6] || values[7] > minThreshold[7] || values[8] > minThreshold[8]){
+  while (values2[0] > minThreshold[0] || values2[1] > minThreshold[1] || values2[2] > minThreshold[2] || values2[3] > minThreshold[3] || values2[4] > minThreshold[4] || values2[5] > minThreshold[5] || values2[6] > minThreshold[6] || values2[7] > minThreshold[7] || values2[8] > minThreshold[8]){
     values2[0] = analogRead(A11);    //thumb
     values2[1] = analogRead(A8);     //pointer tip
     values2[2] = analogRead(A15);    //pointer base
@@ -298,7 +298,7 @@ void loop(){
       values[i] = values2[i];
       }
     }
-    delay(10);
+    delay(100);
   }
   
   printValues(values, 11);
@@ -309,5 +309,5 @@ void loop(){
   
   Serial.print("Detected Letter: ");
   Serial.println(detectedLetter); // Output detected letter
-  delay(250);
+  delay(100);
 }
