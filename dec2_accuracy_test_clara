@@ -272,11 +272,65 @@ void loop(){
 
   printValues(values, 11);
 
-  int detected = categorizeRead(values);
+  char array_char[50];
+  int count_A = 0; int count_B = 0; int count_C = 0; int count_D = 0; int count_E = 0;
+  int count_F = 0; int count_G = 0; int count_H = 0; int count_I = 0; int count_J = 0;
+  int count_K = 0; int count_L = 0; int count_M = 0; int count_N = 0; int count_O = 0;
+  int count_P = 0; int count_Q = 0; int count_R = 0; int count_S = 0; int count_T = 0;
+  int count_U = 0; int count_V = 0; int count_W = 0; int count_X = 0; int count_Y = 0;
+  int count_Z = 0; int count_NULL = 0;
 
-  char detectedLetter = (char)detected;
+  for (int i=0; i<50; i++){
+    array_char[i] = (char)categorizeRead(values);
+    if(array_char[i]=='A') count_A ++;
+    if(array_char[i]=='B') count_B ++;
+    if(array_char[i]=='C') count_C ++;
+    if(array_char[i]=='D') count_D ++;
+    if(array_char[i]=='E') count_E ++;
+    if(array_char[i]=='F') count_F ++;
+    if(array_char[i]=='G') count_G ++;
+    if(array_char[i]=='H') count_H ++;
+    if(array_char[i]=='I') count_I ++;
+    if(array_char[i]=='J') count_J ++;
+    if(array_char[i]=='K') count_K ++;
+    if(array_char[i]=='L') count_L ++;
+    if(array_char[i]=='M') count_M ++;
+    if(array_char[i]=='N') count_N ++;
+    if(array_char[i]=='O') count_O ++;
+    if(array_char[i]=='P') count_P ++;
+    if(array_char[i]=='Q') count_Q ++;
+    if(array_char[i]=='R') count_R ++;
+    if(array_char[i]=='S') count_S ++;
+    if(array_char[i]=='T') count_T ++;
+    if(array_char[i]=='U') count_U ++;
+    if(array_char[i]=='V') count_V ++;
+    if(array_char[i]=='W') count_W ++;
+    if(array_char[i]=='X') count_X ++;
+    if(array_char[i]=='Y') count_Y ++;
+    if(array_char[i]=='Z') count_Z ++;
+    if(array_char[i]==(char)0) count_NULL ++;
+    delay(50);
+  }
+
+  int count_array = [count_A, count_B, count_C, count_D, count_E, count_F, count_G, count_H, count_I, count_J, count_K, count_L, count_M, count_N, count_O, count_P, count_Q, count_R,
+  count_S, count_T, count_U, count_V, count_W, count_X, count_Y, count_Z, count_NULL]
+
+  char letter_array = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', (char)0]
   
-  Serial.print("Detected Letter: ");
-  Serial.println(detectedLetter); // Output detected letter
-  delay(250);
+  for(int i =0; i<27; i++){
+    if(count_array[i] > 0){
+      Serial.println(letter_array[i]);
+      Serial.println(count_array[i]);
+    } 
+
+  }
+  delay(5000);
+
+
+  //int detected = categorizeRead(values);
+
+  //char detectedLetter = (char)detected;
+  
+  //Serial.print("Detected Letter: ");
+  //Serial.println(detectedLetter); // Output detected letter
 }
